@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "Dell_Fan_Control": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
