@@ -7,10 +7,10 @@
             Message = message;
             var splitMessage = SplitMessage(message);
 
-            Location = splitMessage[0];
-            UnknownFieldA = splitMessage[1];
-            Status = splitMessage[2];
-            UnknownFieldB = splitMessage[3];
+            Location = splitMessage[0].Trim();
+            UnknownFieldA = splitMessage[1].Trim();
+            Status = splitMessage[2].Trim();
+            UnknownFieldB = splitMessage[3].Trim();
 
             var tempReading = splitMessage[4].Replace("degrees C", "").Trim();
             Temp = int.Parse(tempReading);

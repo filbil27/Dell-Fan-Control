@@ -4,5 +4,6 @@
     {
         public int DefaultMaxPower { get; set; }
         public int ReturnToAutomaticTemp { get; set; }
+        public int ReturnToManualTemp { get; set; }
     }
 }
