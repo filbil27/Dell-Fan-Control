@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -11,10 +9,12 @@ namespace Dell_Fan_Control
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly IMPIInteraction _iMPIInteraction;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction)
         {
             _logger = logger;
+            _iMPIInteraction = iMPIInteraction;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -22,7 +22,12 @@ namespace Dell_Fan_Control
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                _iMPIInteraction.GetTemperture();
+
+                _iMPIInteraction.SetFan(10);
+                await Task.Delay(5000, stoppingToken);
+                _iMPIInteraction.SetFan(0);
+                await Task.Delay(10000, stoppingToken);
             }
         }
     }
