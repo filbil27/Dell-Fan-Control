@@ -14,15 +14,24 @@ namespace Dell_Fan_Control
     {
         public static void Main(string[] args)
         {
+            var programData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dell Fan Control");
+            CreateDirectory(programData);
+            var configLoc = Path.Combine(programData, "Configuration");
+            CreateDirectory(configLoc);
+            var logLoc = Path.Combine(programData, "Logs");
+            CreateDirectory(programData);
+
             var configBuilder = new ConfigurationBuilder()
-               .SetBasePath(Directory.GetCurrentDirectory())
-               .AddJsonFile("appsettings.json", optional: true);
+               .SetBasePath(configLoc)
+               .AddJsonFile("appsettings.json", optional: false)
+               .AddJsonFile("appsettings.Development.json", optional: true);
             var config = configBuilder.Build();
             CreateHostBuilder(args, config).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args, IConfigurationRoot configuration) =>
             Host.CreateDefaultBuilder(args)
+            .UseWindowsService()
             .ConfigureServices((hostContext, services) =>
             {
                 services.AddHostedService<Worker>();
@@ -31,5 +40,11 @@ namespace Dell_Fan_Control
                 services.Configure<IMPIOptions>(configuration.GetSection("IMPIOptions"));
                 services.Configure<FanOptions>(configuration.GetSection("FanOptions"));
             });
-    }
+
+
+        private static void CreateDirectory(string path)
+        {
+            if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
+        }
+}
 }
