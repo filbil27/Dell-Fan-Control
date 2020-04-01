@@ -14,7 +14,7 @@ namespace Dell_Fan_Control
     {
         public static void Main(string[] args)
         {
-            var programData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dell Fan Control");
+            var programData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Dell Fan Control");
             CreateDirectory(programData);
             var configLoc = Path.Combine(programData, "Configuration");
             CreateDirectory(configLoc);
