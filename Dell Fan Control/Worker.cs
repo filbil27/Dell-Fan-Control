@@ -35,6 +35,12 @@ namespace Dell_Fan_Control
             }
         }
 
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            SetAutoFan();
+            await Task.Delay(1000, cancellationToken);
+        }
+
         private void SetManualFan(bool setToDefaultMax = false)
         {
             _iMPIInteraction.SetMannualFanControl();
