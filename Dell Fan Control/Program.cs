@@ -24,7 +24,10 @@ namespace Dell_Fan_Control
             var configBuilder = new ConfigurationBuilder()
                .SetBasePath(configLoc)
                .AddJsonFile("appsettings.json", optional: false)
-               .AddJsonFile("appsettings.Development.json", optional: true);
+#if DEBUG
+               .AddJsonFile("appsettings.Development.json", optional: true)
+#endif
+               .AddJsonFile("fanLevels.Json", optional: false);
             var config = configBuilder.Build();
             CreateHostBuilder(args, config).Build().Run();
         }
@@ -39,6 +42,7 @@ namespace Dell_Fan_Control
                 services.Configure<ApplicationOptions>(configuration.GetSection("ApplicationOptions"));
                 services.Configure<IMPIOptions>(configuration.GetSection("IMPIOptions"));
                 services.Configure<FanOptions>(configuration.GetSection("FanOptions"));
+                services.Configure<FanLevels>(configuration);
             });
 
 

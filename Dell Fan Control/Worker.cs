@@ -14,13 +14,18 @@ namespace Dell_Fan_Control
         private readonly ILogger<Worker> _logger;
         private readonly IMPIInteraction _iMPIInteraction;
         private readonly FanOptions _fanOptions;
+        private readonly FanLevels _fanLevels;
         private bool _fanManual = false;
+        private int _currentFanSpeed = -1;
+        private int _highestTempLevel = -1;
+        private int _lowestTempLevel = -1;
 
-        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction, IOptions<FanOptions> fanOptions)
+        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction, IOptions<FanOptions> fanOptions, IOptions<FanLevels> fanLevels)
         {
             _logger = logger;
             _iMPIInteraction = iMPIInteraction;
             _fanOptions = fanOptions.Value;
+            _fanLevels = fanLevels.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,7 +35,7 @@ namespace Dell_Fan_Control
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogTrace("Checking and adjusting fan speed");
-                AdjustFan();
+                AdjustFan(_fanLevels.TempertureMeasure);
                 await Task.Delay(1000, stoppingToken);
             }
         }
@@ -51,29 +56,59 @@ namespace Dell_Fan_Control
         {
             _iMPIInteraction.SetAutomaticFanControl();
             _fanManual = false;
+            _currentFanSpeed = -1;
         }
-
-        private void AdjustFan()
+        private Models.Temperture GetTemperture(Enum.TempertureMeasure measure)
         {
             var tempertures = _iMPIInteraction.GetTemperture();
-            var temperture = tempertures.OrderByDescending(s => s.Temp).FirstOrDefault();
 
-            if (_fanManual)
+            switch (measure)
             {
-                if (temperture.Temp > _fanOptions.ReturnToAutomaticTemp) 
-                {
-                    _logger.LogDebug("Setting Fans back to Auto");
-                    SetAutoFan(); 
-                }
+                case Enum.TempertureMeasure.Highest:
+                    return tempertures.OrderByDescending(s => s.Temp).FirstOrDefault();
+
+                case Enum.TempertureMeasure.Average:
+                    var averageTemp = (int)tempertures.Average(s => s.Temp);
+                    return new Models.Temperture(averageTemp);
+
+                default:
+                    return new Models.Temperture(500);
+            }
+        }
+
+        private void AdjustFan(Enum.TempertureMeasure measure)
+        {
+            var temperture = GetTemperture(measure);
+
+            if (temperture == null) { SetAutoFan(); }
+
+            var level = _fanLevels.Levels.Where(o => o.Low < temperture.Temp && temperture.Temp < o.High).FirstOrDefault();
+
+            if (level == null)
+            {
+                SetAutoFan();
             }
             else
             {
-                if (temperture.Temp < _fanOptions.ReturnToManualTemp) 
+                if (!_fanManual) { _iMPIInteraction.SetMannualFanControl(); }
+                if (_currentFanSpeed != level.Speed) 
                 {
-                    _logger.LogDebug("Setting Fans to Manual");
-                    SetManualFan(true); 
+                    _currentFanSpeed = level.Speed;
+                    _iMPIInteraction.SetFan(level.Speed); 
                 }
             }
+        }
+
+        private int GetHighestTempertureLevel()
+        {
+            if (_highestTempLevel == -1) { _highestTempLevel = _fanLevels.Levels.OrderByDescending(o => o.High).First().High; }
+            return _highestTempLevel;
+        }
+
+        private int GetLowestTempertureLevel()
+        {
+            if (_lowestTempLevel == -1) { _lowestTempLevel = _fanLevels.Levels.OrderBy(o => o.Low).First().Low; }
+            return _lowestTempLevel;
         }
     }
 }

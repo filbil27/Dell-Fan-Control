@@ -2,6 +2,10 @@
 {
     public class Temperture
     {
+        public Temperture(int temp) 
+        {
+            Temp = temp;
+        }
         public Temperture(string message)
         {
             Message = message;

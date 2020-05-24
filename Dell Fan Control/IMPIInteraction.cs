@@ -1,10 +1,8 @@
 ﻿using Dell_Fan_Control.Models;
 using Dell_Fan_Control.Options;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace Dell_Fan_Control
 {
@@ -12,10 +10,10 @@ namespace Dell_Fan_Control
     {
         private readonly IMPIOptions _IMPIOptions;
         private readonly ApplicationOptions _applicationOptions;
-        private static readonly string _commandTemplateSetFan = "-I lanplus -H {0} -U {1} -P {2} raw 0x30 0x30 0x02 0xff 0x{3}";
-        private static readonly string _commandTemplateSetMannualFanControl = "-I lanplus -H {0} -U {1} -P {2} raw 0x30 0x30 0x01 0x00";
-        private static readonly string _commandTemplateSetAutomaticFanControl = "-I lanplus -H {0} -U {1} -P {2} raw 0x30 0x30 0x01 0x01";
-        private static readonly string _commandTemplateGetTemperature = "-I lanplus -H {0} -U {1} -P {2} sdr type temperature";
+        private static readonly string _commandTemplateSetFan = "-I lanplus -H {0} -U {1} -P \"{2}\" raw 0x30 0x30 0x02 0xff 0x{3}";
+        private static readonly string _commandTemplateSetMannualFanControl = "-I lanplus -H {0} -U {1} -P \"{2}\" raw 0x30 0x30 0x01 0x00";
+        private static readonly string _commandTemplateSetAutomaticFanControl = "-I lanplus -H {0} -U {1} -P \"{2}\" raw 0x30 0x30 0x01 0x01";
+        private static readonly string _commandTemplateGetTemperature = "-I lanplus -H {0} -U {1} -P \"{2}\" sdr type temperature";
         public IMPIInteraction(IOptions<IMPIOptions> options, IOptions<ApplicationOptions> appOptions)
         {
             _IMPIOptions = options.Value;
@@ -27,7 +25,6 @@ namespace Dell_Fan_Control
             var command = string.Format(_commandTemplateGetTemperature, _IMPIOptions.Host, _IMPIOptions.Username, _IMPIOptions.Password);
             var result = new List<Temperture> { };
 
-            //IssueCommand("dir", out var output);
             IssueCommand(command, out var output2);
             var tempOut = output2.Split("\n");
             foreach (var s in tempOut) 
@@ -52,7 +49,7 @@ namespace Dell_Fan_Control
 
         private void IssueCommand(string command, out string consoleOutput)
         {
-            string fullCommand = string.Format("{0}impitool {1}", GetIMPILocation(), command);
+            //string fullCommand = string.Format("{0}impitool {1}", GetIMPILocation(), command);
 
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo(GetIMPILocation(), command)
@@ -69,7 +66,6 @@ namespace Dell_Fan_Control
             process.WaitForExit();
         }
 
-        //private string GetIMPILocation() => _applicationOptions.IPMIToolLocation.EndsWith(@"\") ? _applicationOptions.IPMIToolLocation : _applicationOptions.IPMIToolLocation + @"\";
         private string GetIMPILocation() =>  _applicationOptions.IPMIToolLocation;
         public void SetAutomaticFanControl() => IssueCommand(string.Format(_commandTemplateSetAutomaticFanControl, _IMPIOptions.Host, _IMPIOptions.Username, _IMPIOptions.Password), out var _);
         public void SetMannualFanControl() => IssueCommand(string.Format(_commandTemplateSetMannualFanControl, _IMPIOptions.Host, _IMPIOptions.Username, _IMPIOptions.Password), out var _);
