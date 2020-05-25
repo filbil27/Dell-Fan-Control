@@ -21,12 +21,6 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/filbil27/Dell-Fan-Control/tags). 
 
-## Authors
-
-* **Filbil27** - *Initial work* - [Filbil27](https://github.com/Filbil27)
-
-See also the list of [contributors](https://github.com/filbil27/Dell-Fan-Control/contributors) who participated in this project.
-
 ## License
 
-TBC
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
