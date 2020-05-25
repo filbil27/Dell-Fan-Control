@@ -13,24 +13,22 @@ namespace Dell_Fan_Control
     {
         private readonly ILogger<Worker> _logger;
         private readonly IMPIInteraction _iMPIInteraction;
-        private readonly FanOptions _fanOptions;
         private readonly FanLevels _fanLevels;
         private bool _fanManual = false;
         private int _currentFanSpeed = -1;
         private int _highestTempLevel = -1;
         private int _lowestTempLevel = -1;
 
-        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction, IOptions<FanOptions> fanOptions, IOptions<FanLevels> fanLevels)
+        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction, IOptions<FanLevels> fanLevels)
         {
             _logger = logger;
             _iMPIInteraction = iMPIInteraction;
-            _fanOptions = fanOptions.Value;
             _fanLevels = fanLevels.Value;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            SetManualFan(true);
+            SetManualFan();
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -46,11 +44,10 @@ namespace Dell_Fan_Control
             await Task.Delay(1000, cancellationToken);
         }
 
-        private void SetManualFan(bool setToDefaultMax = false)
+        private void SetManualFan()
         {
             _iMPIInteraction.SetMannualFanControl();
             _fanManual = true;
-            if (setToDefaultMax) { _iMPIInteraction.SetFan(_fanOptions.DefaultMaxPower); }
         }
         private void SetAutoFan()
         {

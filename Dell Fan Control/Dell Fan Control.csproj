@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>dotnet-Dell_Fan_Control-2E304FD3-7589-4E78-9CE9-E21E57A06EC7</UserSecretsId>
     <RootNamespace>Dell_Fan_Control</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

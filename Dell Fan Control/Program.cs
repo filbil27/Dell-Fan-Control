@@ -41,7 +41,6 @@ namespace Dell_Fan_Control
                 services.AddTransient<IMPIInteraction>();
                 services.Configure<ApplicationOptions>(configuration.GetSection("ApplicationOptions"));
                 services.Configure<IMPIOptions>(configuration.GetSection("IMPIOptions"));
-                services.Configure<FanOptions>(configuration.GetSection("FanOptions"));
                 services.Configure<FanLevels>(configuration);
             });
 
