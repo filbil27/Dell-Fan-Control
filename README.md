@@ -3,23 +3,13 @@ A .Net Core Service that manually controls the speeds of fans on Dell Poweredge 
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
-
 ```
-.Net Core
+.Net Core 3.1
 ```
 
 ### Installing
 
 TBC
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/filbil27/Dell-Fan-Control/tags). 
 
 ## License
 
