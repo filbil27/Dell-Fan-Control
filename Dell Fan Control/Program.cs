@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Dell_Fan_Control.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +24,7 @@ namespace Dell_Fan_Control
 #if DEBUG
                .AddJsonFile("appsettings.Development.json", optional: true)
 #endif
-               .AddJsonFile("fanLevels.Json", optional: false);
+               .AddJsonFile("fanLevels.Json", optional: false, reloadOnChange: true);
             var config = configBuilder.Build();
             CreateHostBuilder(args, config).Build().Run();
         }

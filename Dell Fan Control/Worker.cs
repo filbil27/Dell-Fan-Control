@@ -14,20 +14,23 @@ namespace Dell_Fan_Control
     {
         private readonly ILogger<Worker> _logger;
         private readonly IMPIInteraction _iMPIInteraction;
-        private readonly FanLevels _fanLevels;
+        private FanLevels _fanLevels;
         private DateTimeOffset _speedLastChanged;
         private bool _fanManual = false;
         private int _currentFanSpeed = -1;
         private int _highestTempLevel = -1;
         private int _lowestTempLevel = -1;
 
-        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction, IOptions<FanLevels> fanLevels)
+        public Worker(ILogger<Worker> logger, IMPIInteraction iMPIInteraction, IOptionsMonitor<FanLevels> fanLevels)
         {
             _logger = logger;
             _iMPIInteraction = iMPIInteraction;
-            _fanLevels = fanLevels.Value;
+            fanLevels.OnChange(SetFanLevelOptions);
+            SetFanLevelOptions(fanLevels.CurrentValue, "");
             _speedLastChanged = DateTimeOffset.MinValue;
         }
+
+        private void SetFanLevelOptions(FanLevels options, string s) => _fanLevels = options;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
