@@ -49,11 +49,13 @@ namespace Dell_Fan_Control
 
         private void SetManualFan()
         {
+            _logger.LogDebug("Setting fan to manual control");
             _iMPIInteraction.SetMannualFanControl();
             _fanManual = true;
         }
         private void SetAutoFan()
         {
+            _logger.LogDebug("Setting fan to automatic control");
             _iMPIInteraction.SetAutomaticFanControl();
             _fanManual = false;
             _currentFanSpeed = -1;
@@ -83,7 +85,7 @@ namespace Dell_Fan_Control
 
             if (temperture == null) { SetAutoFan(); }
 
-            var level = _fanLevels.Levels.Where(o => o.Low < temperture.Temp && temperture.Temp < o.High).FirstOrDefault();
+            var level = _fanLevels.Levels.Where(o => o.Low <= temperture.Temp && temperture.Temp <= o.High).FirstOrDefault();
 
             if (level == null)
             {
