@@ -25,7 +25,7 @@ The following configuration files need to be strored in the folder (C:\ProgramDa
 * AppSettings.json
 * FanLevels.json
 
-For more information about the settings in the configuration files please view the wiki.
+For more information about the settings in the configuration files please see [Configuration.md](Configuration.md)
 
 ## License
 
