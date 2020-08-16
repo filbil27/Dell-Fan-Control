@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace Dell_Fan_Control
         private readonly ILogger<Worker> _logger;
         private readonly IMPIInteraction _iMPIInteraction;
         private readonly FanLevels _fanLevels;
+        private DateTimeOffset _speedLastChanged;
         private bool _fanManual = false;
         private int _currentFanSpeed = -1;
         private int _highestTempLevel = -1;
@@ -24,6 +26,7 @@ namespace Dell_Fan_Control
             _logger = logger;
             _iMPIInteraction = iMPIInteraction;
             _fanLevels = fanLevels.Value;
+            _speedLastChanged = DateTimeOffset.MinValue;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,6 +57,7 @@ namespace Dell_Fan_Control
             _iMPIInteraction.SetAutomaticFanControl();
             _fanManual = false;
             _currentFanSpeed = -1;
+            _speedLastChanged = DateTimeOffset.Now;
         }
         private Models.Temperture GetTemperture(Enum.TempertureMeasure measure)
         {
@@ -88,12 +92,41 @@ namespace Dell_Fan_Control
             else
             {
                 if (!_fanManual) { _iMPIInteraction.SetMannualFanControl(); }
-                if (_currentFanSpeed != level.Speed) 
-                {
-                    _currentFanSpeed = level.Speed;
-                    _iMPIInteraction.SetFan(level.Speed); 
-                }
+                if (CanAdjustFanSpeed(_currentFanSpeed, level.Speed, _fanLevels.MinimumTimeBeforeDropping)) { AdjustFan(level.Speed); }
             }
+        }
+
+        private void AdjustFan(int fanSpeed)
+        {
+            _currentFanSpeed = fanSpeed;
+            _iMPIInteraction.SetFan(fanSpeed);
+            _speedLastChanged = DateTimeOffset.Now;
+        }
+
+        /// <summary>
+        /// If the worker is allowed to change the speed of the fan
+        /// </summary>
+        /// <param name="currentSpeed">Current speed of the fan</param>
+        /// <param name="desiredSpeed">The value that the service wants to change the speed to</param>
+        /// <param name="intervalBeforeFanChange">How long the service needs to wait before setting a lower fan speed. (An increase in fan speed will ingore this value) (In seconds)</param>
+        /// <returns></returns>
+        private bool CanAdjustFanSpeed(int currentSpeed, int desiredSpeed, int intervalBeforeFanChange)
+        {
+            if (desiredSpeed > currentSpeed)
+            {
+                _logger.LogDebug("Desired Speed is greater. Changing fan speed | Desired Speed: {DesiredSpeed} | Current Speed: {CurrentSpeed}", desiredSpeed, currentSpeed);
+                return true;
+            }
+            else if ((desiredSpeed < currentSpeed) && (_speedLastChanged.AddSeconds(intervalBeforeFanChange) < DateTimeOffset.Now))
+            {
+                _logger.LogDebug("Desired Speed is less and Minimum Time Before Dropping has lasped. Changing fan speed | Desired Speed: {DesiredSpeed} | Current Speed: {CurrentSpeed} " +
+                    "| Minimum Time Before Dropping: {MinimumTimeBeforeDropping}", desiredSpeed, currentSpeed, intervalBeforeFanChange);
+                return true;
+            }
+
+            _logger.LogTrace("No requirement to change current fan speed | Desired Speed: {DesiredSpeed} | Current Speed: {CurrentSpeed} " +
+                    "| Minimum Time Before Dropping: {MinimumTimeBeforeDropping}", desiredSpeed, currentSpeed, intervalBeforeFanChange);
+            return false;
         }
 
         private int GetHighestTempertureLevel()
