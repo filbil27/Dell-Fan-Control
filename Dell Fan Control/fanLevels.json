@@ -1,11 +1,16 @@
 {
-  "MinimumTimeBeforeDropping": 30,
+  "MinimumTimeBeforeDropping": 300,
   "TempertureMeasure": "Highest",
   "Levels": [
     {
       "Low": 0,
+      "High": 30,
+      "Speed": 20
+    },
+    {
+      "Low": 30,
       "High": 50,
-      "Speed": 7
+      "Speed": 40
     }
   ]
 }
